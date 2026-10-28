@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Aster DEX · Dashboard Solo Lectura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0e11;
+      --card: #14181f;
+      --border: #1e2430;
+      --text: #e8eaed;
+      --muted: #8b949e;
+      --green: #00c853;
+      --red: #ff5252;
+      --blue: #3b82f6;
+      --yellow: #fbbf24;
+      --purple: #a78bfa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 14px;
+    }
+
+    header {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      width: 100%;
+      font-family: monospace;
+      letter-spacing: 0.02em;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex: 1;
+    }
+
+    button:hover { background: #2563eb; }
+    button:disabled {
+      background: #374151;
+      cursor: not-allowed;
+    }
+
+    .status {
+      font-size: 0.82rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .dot.live { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .dot.error { background: var(--red); }
+    .dot.loading { background: var(--yellow); animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .card-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+    }
+
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .positive { color: var(--green); }
+    .negative { color: var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 8px;
+      color: var(--muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td {
+      padding: 12px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .symbol { font-weight: 600; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .badge-long { background: rgba(0,200,83,0.15); color: var(--green); }
+    .badge-short { background: rgba(255,82,82,0.15); color: var(--red); }
+    .badge-both { background: rgba(167,139,250,0.15); color: var(--purple); }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 24px 0 12px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+    }
+
+    .privacy-warning, .error-box, .info-box {
+      padding: 14px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .privacy-warning {
+      background: rgba(251,191,36,0.1);
+      border: 1px solid rgba(251,191,36,0.3);
+      color: var(--yellow);
+    }
+
+    .error-box {
+      background: rgba(255,82,82,0.1);
+      border: 1px solid rgba(255,82,82,0.3);
+      color: var(--red);
+    }
+
+    .info-box {
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: #93c5fd;
+    }
+
+    footer {
+      margin-top: 36px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (min-width: 640px) {
+      .controls {
+        flex-direction: row;
+        align-items: center;
+      }
+      input[type="text"] {
+        width: 380px;
+        max-width: 100%;
+      }
+      .btn-row {
+        flex: none;
+      }
+      button {
+        flex: none;
+        min-width: 110px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">A</div>
+        <div>
+          <h1>Aster DEX Dashboard</h1>
+          <div class="subtitle">Solo lectura · Monitoreo de cuenta</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input type="text" id="walletInput" placeholder="Pega aquí la dirección completa (0x...)" autocomplete="off" spellcheck="false" />
+        <div class="btn-row">
+          <button id="loadBtn" onclick="loadData()">Cargar</button>
+          <button id="refreshBtn" onclick="loadData()" disabled>Actualizar</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="status" id="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Introduce la dirección completa de tu wallet</span>
+    </div>
+
+    <div id="infoBox" class="info-box" style="display:none;"></div>
+    <div id="errorBox" class="error-box" style="display:none;"></div>
+    <div id="privacyWarning" class="privacy-warning" style="display:none;"></div>
+
+    <div id="content" style="display:none;">
+      <div class="grid" id="summaryCards"></div>
+
+      <div class="section-title">💰 Saldos</div>
+      <div class="card">
+        <div id="balancesTable"></div>
+      </div>
+
+      <div class="section-title">📊 Posiciones Abiertas</div>
+      <div class="card">
+        <div class="table-wrap">
+          <div id="positionsTable"></div>
+        </div>
+      </div>
+
+      <div id="stakingSection" style="display:none;">
+        <div class="section-title">🔒 Staking</div>
+        <div class="card">
+          <div id="stakingInfo"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Datos de tapi.asterdex.com · Solo lectura · No se guarda ninguna clave
+    </footer>
+  </div>
+
+  <script>
+    const API_URL = 'https://tapi.asterdex.com/info';
+    let refreshInterval = null;
+    const REFRESH_MS = 15000;
+
+    function fmt(num, decimals = 2) {
+      if (num === null || num === undefined || isNaN(num)) return '—';
+      return Number(num).toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function fmtUsd(num) {
+      if (num === null || num === undefined || isNaN(num)) return '—';
+      const n = Number(num);
+      const sign = n >= 0 ? '+' : '';
+      return sign + '$' + fmt(Math.abs(n));
+    }
+
+    function fmtPrice(num) {
+      if (num === null || num === undefined || isNaN(num)) return '—';
+      const n = Number(num);
+      if (n >= 1000) return fmt(n, 2);
+      if (n >= 1) return fmt(n, 4);
+      return fmt(n, 6);
+    }
+
+    function setStatus(text, type = 'normal') {
+      document.getElementById('statusText').textContent = text;
+      const dot = document.getElementById('statusDot');
+      dot.className = 'dot';
+      if (type === 'live') dot.classList.add('live');
+      if (type === 'error') dot.classList.add('error');
+      if (type === 'loading') dot.classList.add('loading');
+    }
+
+    function showError(msg, isHtml = false) {
+      const box = document.getElementById('errorBox');
+      box.style.display = 'block';
+      if (isHtml) box.innerHTML = msg;
+      else box.textContent = msg;
+      document.getElementById('content').style.display = 'none';
+    }
+
+    function hideError() {
+      document.getElementById('errorBox').style.display = 'none';
+    }
+
+    function showInfo(msg) {
+      const box = document.getElementById('infoBox');
+      box.style.display = 'block';
+      box.innerHTML = msg;
+    }
+
+    function hideInfo() {
+      document.getElementById('infoBox').style.display = 'none';
+    }
+
+    async function loadData() {
+      const input = document.getElementById('walletInput');
+      let address = input.value.trim();
+
+      if (!address) {
+        showError('Por favor pega la dirección completa de tu wallet.');
+        return;
+      }
+
+      // Normalizar
+      if (!address.startsWith('0x') && !address.startsWith('0X')) {
+        address = '0x' + address;
+      }
+      address = address.toLowerCase();
+
+      // Validación básica de longitud
+      if (address.length < 42) {
+        showError(
+          'La dirección parece incompleta.<br><br>' +
+          'Una dirección normal de Ethereum/Aster tiene <strong>42 caracteres</strong> (empieza por 0x + 40 caracteres hex).<br>' +
+          'La que pegaste tiene solo <strong>' + address.length + '</strong> caracteres.<br><br>' +
+          'Copia la dirección completa desde la app de Aster o desde tu wallet.'
+        , true);
+        return;
+      }
+
+      document.getElementById('loadBtn').disabled = true;
+      document.getElementById('refreshBtn').disabled = true;
+      setStatus('Consultando datos...', 'loading');
+      hideError();
+      hideInfo();
+
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            id: 1,
+            jsonrpc: '2.0',
+            method: 'aster_getBalance',
+            params: [address, 'latest']
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          throw new Error('HTTP ' + res.status);
+        }
+
+        const data = await res.json();
+
+        if (data.error) {
+          const msg = data.error.message || JSON.stringify(data.error);
+          if (msg.includes('does not exist') || msg.includes('open a futures account')) {
+            showError(
+              'La cuenta no existe o aún no has abierto cuenta de futuros en Aster.<br><br>' +
+              'Asegúrate de:<br>' +
+              '• Haber conectado esta wallet en asterdex.com<br>' +
+              '• Haber hecho al menos un depósito<br>' +
+              '• Estar usando la dirección correcta (la principal de Aster)'
+            , true);
+          } else {
+            showError('Error de la API: ' + msg);
+          }
+          setStatus('Error de la API', 'error');
+          return;
+        }
+
+        if (!data.result) {
+          throw new Error('Respuesta inesperada del servidor');
+        }
+
+        renderDashboard(data.result);
+        setStatus('Última actualización: ' + new Date().toLocaleTimeString() + ' · Auto cada 15s', 'live');
+
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(loadData, REFRESH_MS);
+
+      } catch (err) {
+        console.error(err);
+
+        let message = '';
+        if (err.name === 'AbortError') {
+          message = 'Tiempo de espera agotado. Revisa tu conexión a internet.';
+        } else if (err.message === 'Failed to fetch' || err.message.includes('NetworkError') || err.message.includes('Load failed')) {
+          message =
+            '<strong>Error de conexión / CORS</strong><br><br>' +
+            'El navegador está bloqueando la petición (problema común al abrir archivos HTML locales).<br><br>' +
+            '<strong>Soluciones:</strong><br>' +
+            '1. Prueba desde un ordenador abriendo el archivo con un servidor local:<br>' +
+            '&nbsp;&nbsp;&nbsp;<code>python -m http.server 8000</code> y luego entra a http://localhost:8000<br><br>' +
+            '2. O sube el archivo temporalmente a algún hosting gratuito (Netlify Drop, GitHub Pages, etc.)<br><br>' +
+            '3. Verifica también que la dirección sea la completa (42 caracteres).';
+        } else {
+          message = 'Error: ' + err.message;
+        }
+
+        showError(message, true);
+        setStatus('Error al conectar', 'error');
+      } finally {
+        document.getElementById('loadBtn').disabled = false;
+        document.getElementById('refreshBtn').disabled = false;
+      }
+    }
+
+    function renderDashboard(result) {
+      document.getElementById('content').style.display = 'block';
+
+      // Privacy
+      const privacyBox = document.getElementById('privacyWarning');
+      if (result.accountPrivacy === 'enabled') {
+        privacyBox.style.display = 'block';
+        privacyBox.innerHTML = '⚠️ <strong>Modo Privacy activado</strong>. Parte de la información puede estar oculta.';
+      } else {
+        privacyBox.style.display = 'none';
+      }
+
+      const assets = result.perpAssets || [];
+      const positionsGroup = result.positions || [];
+      let allPositions = [];
+      positionsGroup.forEach(g => {
+        if (g.positions) allPositions = allPositions.concat(g.positions);
+      });
+
+      const openPositions = allPositions.filter(p => Number(p.positionAmount) !== 0);
+
+      let totalBalance = 0;
+      assets.forEach(a => totalBalance += Number(a.walletBalance) || 0);
+
+      let totalUnrealized = 0;
+      openPositions.forEach(p => totalUnrealized += Number(p.unrealizedProfit) || 0);
+
+      let totalNotional = 0;
+      openPositions.forEach(p => totalNotional += Math.abs(Number(p.notionalValue) || 0));
+
+      const shortAddr = result.address
+        ? result.address.slice(0, 6) + '...' + result.address.slice(-4)
+        : '—';
+
+      document.getElementById('summaryCards').innerHTML = `
+        <div class="card">
+          <div class="card-title">Wallet</div>
+          <div class="card-value" style="font-size:1rem;font-family:monospace;">${shortAddr}</div>
+          <div class="card-sub">Privacidad: ${result.accountPrivacy || '—'}</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Balance Total (aprox.)</div>
+          <div class="card-value">$${fmt(totalBalance)}</div>
+          <div class="card-sub">${assets.length} activos</div>
+        </div>
+        <div class="card">
+          <div class="card-title">PnL No Realizado</div>
+          <div class="card-value ${totalUnrealized >= 0 ? 'positive' : 'negative'}">
+            ${fmtUsd(totalUnrealized)}
+          </div>
+          <div class="card-sub">${openPositions.length} posiciones abiertas</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Notional Abierto</div>
+          <div class="card-value">$${fmt(totalNotional)}</div>
+          <div class="card-sub">Exposición total</div>
+        </div>
+      `;
+
+      // Balances
+      if (assets.length === 0) {
+        document.getElementById('balancesTable').innerHTML = '<div class="empty">No se encontraron saldos</div>';
+      } else {
+        let html = `<table><thead><tr><th>Activo</th><th style="text-align:right">Balance</th></tr></thead><tbody>`;
+        assets
+          .sort((a, b) => Number(b.walletBalance) - Number(a.walletBalance))
+          .forEach(a => {
+            html += `<tr>
+              <td class="symbol">${a.asset}</td>
+              <td style="text-align:right">${fmt(a.walletBalance, 4)}</td>
+            </tr>`;
+          });
+        html += '</tbody></table>';
+        document.getElementById('balancesTable').innerHTML = html;
+      }
+
+      // Positions
+      if (openPositions.length === 0) {
+        document.getElementById('positionsTable').innerHTML = '<div class="empty">No hay posiciones abiertas</div>';
+      } else {
+        let html = `<table>
+          <thead>
+            <tr>
+              <th>Símbolo</th>
+              <th>Lado</th>
+              <th style="text-align:right">Tamaño</th>
+              <th style="text-align:right">Entrada</th>
+              <th style="text-align:right">Mark</th>
+              <th style="text-align:right">PnL</th>
+              <th style="text-align:right">Lev.</th>
+              <th>Margin</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+        openPositions
+          .sort((a, b) => Math.abs(Number(b.notionalValue)) - Math.abs(Number(a.notionalValue)))
+          .forEach(p => {
+            const size = Number(p.positionAmount);
+            const pnl = Number(p.unrealizedProfit) || 0;
+            const side = p.positionSide || (size > 0 ? 'LONG' : 'SHORT');
+            let badgeClass = 'badge-both';
+            if (side === 'LONG') badgeClass = 'badge-long';
+            if (side === 'SHORT') badgeClass = 'badge-short';
+
+            html += `<tr>
+              <td class="symbol">${p.symbol}</td>
+              <td><span class="badge ${badgeClass}">${side}</span></td>
+              <td style="text-align:right">${fmt(Math.abs(size), 4)}</td>
+              <td style="text-align:right">${fmtPrice(p.entryPrice)}</td>
+              <td style="text-align:right">${fmtPrice(p.markPrice)}</td>
+              <td style="text-align:right" class="${pnl >= 0 ? 'positive' : 'negative'}">${fmtUsd(pnl)}</td>
+              <td style="text-align:right">${p.leverage || '—'}x</td>
+              <td>${p.isolated ? 'Isolated' : 'Cross'}</td>
+            </tr>`;
+          });
+
+        html += '</tbody></table>';
+        document.getElementById('positionsTable').innerHTML = html;
+      }
+
+      // Staking
+      const staking = result.staking;
+      const stakingSection = document.getElementById('stakingSection');
+      if (staking && (Number(staking.totalStakedAmount) > 0 || (staking.totalUnclaimedRewards && staking.totalUnclaimedRewards.length))) {
+        stakingSection.style.display = 'block';
+        let html = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;">
+            <div>
+              <div class="card-title">Total Staked</div>
+              <div class="card-value" style="font-size:1.2rem">${fmt(staking.totalStakedAmount)}</div>
+            </div>
+            <div>
+              <div class="card-title">Pending Stake</div>
+              <div class="card-value" style="font-size:1.2rem">${fmt(staking.totalPendingStakeAmount)}</div>
+            </div>
+            <div>
+              <div class="card-title">Pending Unstake</div>
+              <div class="card-value" style="font-size:1.2rem">${fmt(staking.totalPendingUnstakeAmount)}</div>
+            </div>
+          </div>`;
+
+        if (staking.totalUnclaimedRewards && staking.totalUnclaimedRewards.length) {
+          html += `<div style="margin-top:14px;"><div class="card-title">Rewards sin reclamar</div>`;
+          staking.totalUnclaimedRewards.forEach(r => {
+            html += `<div>${r.asset}: <strong>${fmt(r.amount, 4)}</strong></div>`;
+          });
+          html += `</div>`;
+        }
+
+        document.getElementById('stakingInfo').innerHTML = html;
+      } else {
+        stakingSection.style.display = 'none';
+      }
+    }
+
+    // Enter key
+    document.getElementById('walletInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadData();
+    });
+
+    // Auto-focus
+    document.getElementById('walletInput').focus();
+  </script>
+</body>
+</html>
